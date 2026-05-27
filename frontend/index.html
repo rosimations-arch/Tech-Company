@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bookkeeping Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Bookkeeping Dashboard</h1>
+  <form id="addForm">
+    <input type="date" name="date" required>
+    <input type="text" name="description" placeholder="Description" required>
+    <input type="number" name="amount" step="0.01" placeholder="Amount" required>
+    <button type="submit">Add Transaction</button>
+  </form>
+  <h2>Transactions</h2>
+  <table id="transactionsTable">
+    <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
+  </table>
+<script>
+async function fetchTransactions() {
+  let res = await fetch('/api/transactions');
+  let data = await res.json();
+  let table = document.getElementById('transactionsTable');
+  table.innerHTML = '<tr><th>Date</th><th>Description</th><th>Amount</th></tr>';
+  data.forEach(tx => {
+    let row = table.insertRow();
+    row.insertCell(0).innerText = tx.date;
+    row.insertCell(1).innerText = tx.description;
+    row.insertCell(2).innerText = tx.amount;
+  });
+}
+document.getElementById('addForm').onsubmit = async (e) => {
+  e.preventDefault();
+  let form = e.target;
+  await fetch('/api/transactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      date: form.date.value,
+      description: form.description.value,
+      amount: parseFloat(form.amount.value)
+    })
+  });
+  form.reset();
+  fetchTransactions();
+};
+fetchTransactions();
+</script>
+</body>
+</html>
